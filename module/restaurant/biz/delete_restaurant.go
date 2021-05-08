@@ -3,7 +3,6 @@ package biz
 import (
 	"context"
 	"errors"
-	"log"
 	restaurantmodel "nolan/g05-food-delivery/module/restaurant/model"
 )
 
@@ -22,7 +21,6 @@ func NewDeleteRestaurantBiz(store DeleteRestaurantStore) *deleteRestaurantBiz {
 
 func (biz *deleteRestaurantBiz) DeleteRestaurant(context context.Context, id int) error {
 	oldData, err := biz.store.FindDataWithCondition(context, map[string]interface{}{"id": id})
-	log.Println("1111")
 
 	if err != nil {
 		return err

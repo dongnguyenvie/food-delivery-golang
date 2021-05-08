@@ -2,6 +2,7 @@ package ginrestaurant
 
 import (
 	"net/http"
+	"nolan/g05-food-delivery/common"
 	appctx "nolan/g05-food-delivery/component/appctx"
 	restaurantbiz "nolan/g05-food-delivery/module/restaurant/biz"
 	restaurantstorage "nolan/g05-food-delivery/module/restaurant/storage"
@@ -32,5 +33,7 @@ func DeleteRestaurant(appCtx appctx.AppContext) gin.HandlerFunc {
 			})
 			return
 		}
+
+		c.JSON(http.StatusOK, common.SimpleSuccessReponse(true))
 	}
 }

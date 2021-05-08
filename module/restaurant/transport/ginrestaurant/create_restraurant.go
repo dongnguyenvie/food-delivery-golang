@@ -2,6 +2,7 @@ package ginrestaurant
 
 import (
 	"net/http"
+	"nolan/g05-food-delivery/common"
 	"nolan/g05-food-delivery/component/appctx"
 	restaurantbiz "nolan/g05-food-delivery/module/restaurant/biz"
 	restaurantmodel "nolan/g05-food-delivery/module/restaurant/model"
@@ -32,6 +33,8 @@ func CreateRestaurant(appCtx appctx.AppContext) gin.HandlerFunc {
 			})
 			return
 		}
+
+		c.JSON(http.StatusOK, common.SimpleSuccessReponse(data.Id))
 
 	}
 }
