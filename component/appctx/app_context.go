@@ -10,10 +10,6 @@ type appCtx struct {
 	db *gorm.DB
 }
 
-func NewAppContext(db *gorm.DB) *appCtx {
-	return &appCtx{db: db}
-}
+func NewAppContext(db *gorm.DB) *appCtx { return &appCtx{db: db} }
 
-func (ctx *appCtx) GetMaiDBConnection() *gorm.DB {
-	return ctx.db
-}
+func (ctx *appCtx) GetMaiDBConnection() *gorm.DB { return ctx.db }
