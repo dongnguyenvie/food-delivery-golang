@@ -1,24 +1,14 @@
-package restaurantstorage
+package userstorage
 
 import (
 	"context"
 	"nolan/g05-food-delivery/common"
-	restaurantmodel "nolan/g05-food-delivery/module/restaurant/model"
+	usermodel "nolan/g05-food-delivery/module/user/model"
 )
 
-func (s *sqlStore) ListDataWithCondition(
-	context context.Context,
-	filter *restaurantmodel.Filter,
-	paging *common.Paging,
-) ([]restaurantmodel.Restaurant, error) {
-	var result []restaurantmodel.Restaurant
-	db := s.db.Table(restaurantmodel.Restaurant{}.TableName()).Where("status in (1)")
-
-	if f := filter; f != nil {
-		if f.OwnerId > 0 {
-			db = db.Where("owner_id = ?", f.OwnerId)
-		}
-	}
+func (s *sqlStore) ListDataWithCondition(context context.Context, filter *usermodel.Filter, paging *common.Paging) ([]usermodel.User, error) {
+	var result []usermodel.User
+	db := s.db.Table(usermodel.User{}.TableName()).Where("status in (1)")
 
 	if err := db.Count(&paging.Total).Error; err != nil {
 		return nil, common.ErrDB(err)

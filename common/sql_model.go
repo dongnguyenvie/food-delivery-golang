@@ -1,6 +1,8 @@
 package common
 
-import "time"
+import (
+	"time"
+)
 
 type SQLModel struct {
 	Id        int        `json:"-" gorm:"column:id;"`

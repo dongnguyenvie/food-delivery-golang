@@ -4,10 +4,9 @@ import (
 	"log"
 	"net/http"
 	"nolan/g05-food-delivery/component/appctx"
+	"nolan/g05-food-delivery/component/uploadprovider"
 	"nolan/g05-food-delivery/middleware"
-	"nolan/g05-food-delivery/module/restaurant/transport/ginrestaurant"
 	"os"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
@@ -35,6 +34,13 @@ func (RestaurantUpdate) TableName() string { return Restaurant{}.TableName() }
 func main() {
 	dsn := os.Getenv("MYSQL_CONN_STRING")
 
+	s3BucketName := os.Getenv("S3_BUCKET_NAME")
+	s3Region := os.Getenv("S3_REGION")
+	s3APIKey := os.Getenv("S3_API_KEY")
+	s3SecretKey := os.Getenv("S3_SECRET")
+	s3Domain := os.Getenv("S3_DOMAIN")
+	secretKey := os.Getenv("SYSTEM_SECRET")
+
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
 	if err != nil {
@@ -43,7 +49,9 @@ func main() {
 
 	db = db.Debug()
 
-	appContext := appctx.NewAppContext(db)
+	s3Provider := uploadprovider.NewS3Provider(s3BucketName, s3Region, s3APIKey, s3SecretKey, s3Domain)
+
+	appContext := appctx.NewAppContext(db, s3Provider, secretKey)
 
 	r := gin.Default()
 	r.Use(middleware.Recover(appContext))
@@ -54,64 +62,10 @@ func main() {
 		})
 	})
 
-	// POST /restaurants
+	r.Static("/static", "static")
+
 	v1 := r.Group("/v1")
-
-	restaurants := v1.Group("/restaurants")
-
-	restaurants.POST("", ginrestaurant.CreateRestaurant(appContext))
-
-	restaurants.GET("/:id", func(c *gin.Context) {
-		id, err := strconv.Atoi(c.Param("id"))
-
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": err.Error(),
-			})
-
-			return
-		}
-
-		var data Restaurant
-
-		db.Where("id = ?", id).First(&data)
-
-		c.JSON(http.StatusOK, gin.H{
-			"data": data,
-		})
-	})
-
-	restaurants.GET("", ginrestaurant.ListRestaurant(appContext))
-
-	restaurants.PATCH("/:id", func(c *gin.Context) {
-		id, err := strconv.Atoi(c.Param("id"))
-
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": err.Error(),
-			})
-
-			return
-		}
-
-		var data RestaurantUpdate
-
-		if err := c.ShouldBind(&data); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": err.Error(),
-			})
-
-			return
-		}
-
-		db.Where("id = ?", id).Updates(&data)
-
-		c.JSON(http.StatusOK, gin.H{
-			"data": data,
-		})
-	})
-
-	restaurants.DELETE("/:id", ginrestaurant.DeleteRestaurant(appContext))
+	setupRoute(appContext, v1)
 
 	r.Run()
 
@@ -131,7 +85,7 @@ func main() {
 	//
 	//log.Println(myRestaurant)
 	//
-	//newName := "200Lab"
+	//newName := "test200"
 	//updateData := RestaurantUpdate{Name: &newName}
 	//
 	//if err := db.Where("id = ?", 3).Updates(&updateData).Error; err != nil {
